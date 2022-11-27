@@ -3,13 +3,13 @@
         <div class="col-xs-12">
             <div class="alert alert-info" ng-if="$ctrl.thermostats.length === 0">
                 <fa name="info-circle" fw class="pull-right" size="2"></fa>
-                <p>Nie masz jeszcze żadnych termostatów. Dodaj nowy za pomocą formularza poniżej.</p>
+                <p>Looks empty. Add new using form below.</p>
             </div>
 
             <loader-dots ng-if="!$ctrl.thermostats"></loader-dots>
 
             <div ng-else>
-                <h1 view-title>Termostaty</h1>
+                <h1 view-title>Your Thermostats</h1>
                 <div class="alert alert-warning">
                     <fa name="exclamation-triangle" fw class="pull-right" size="2"></fa>
                     <strong><big>To NIE jest oficjalna funkcjonalność SUPLA.</big></strong> Używając tej funkcjonalności zgadzasz się z tym, że:
@@ -39,19 +39,19 @@
                                         ng-if="!thermostat.enabled"
                                         promise-btn
                                         ng-click="$ctrl.deleteThermostat(thermostat)">
-                                    Usuń
+                                    Delete
                                 </button>
                                 <button class="btn btn-default"
                                         ng-if="thermostat.enabled"
                                         promise-btn
                                         ng-click="$ctrl.disableThermostat(thermostat)">
-                                    Dezaktywuj
+                                    Deactivate
                                 </button>
                                 <button class="btn btn-default"
                                         ng-if="!thermostat.enabled"
                                         promise-btn
                                         ng-click="$ctrl.enableThermostat(thermostat)">
-                                    Aktywuj
+                                    Activate
                                 </button>
                             </div>
                         </h4>
@@ -62,16 +62,16 @@
                         <div class="col-md-8 col-md-offset-4">
                             <div class="form-group">
                                 <span class="input-group">
-                                    <input type="text" class="form-control" placeholder="Nazwa nowego termostatu"
+                                    <input type="text" class="form-control" placeholder="Name your new thermostat"
                                            required
                                            ng-model="$ctrl.newLabel">
                                     <span class="input-group-addon">
                                         Sterowanie &nbsp;
-                                        <label tooltips tooltip-template="temperaturą">
+                                        <label tooltips tooltip-template="temperature">
                                             <input type="radio" ng-model="$ctrl.newTarget" value="temperature">
                                             <fa name="thermometer" fw></fa>
                                         </label> &nbsp;
-                                        <label tooltips tooltip-template="wilgotnością">
+                                        <label tooltips tooltip-template="moisture">
                                             <input type="radio" ng-model="$ctrl.newTarget" value="humidity">
                                             <fa name="tint" fw></fa>
                                         </label>
@@ -79,7 +79,7 @@
                                     <span class="input-group-btn">
                                         <button type="submit" class="btn btn-primary">
                                             <fa name="plus-circle" fw></fa>
-                                            Dodaj
+                                            Add
                                         </button>
                                     </span>
                                 </span>
