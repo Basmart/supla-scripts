@@ -1,0 +1,183 @@
+<h2 class="no-margin-top">{{ $ctrl.scene.id ? 'Edytuj' : 'Dodaj' }} scenę</h2>
+<form name="sceneForm"
+      novalidate
+      promise-btn
+      ng-submit="$broadcast('show-errors-check-validity') && sceneForm.$valid && $ctrl.submit()">
+
+    <div class="form-group" show-errors>
+        <label>Nazwa</label>
+        <input type="text" class="form-control" name="label" required ng-model="$ctrl.scene.label">
+    </div>
+
+    <div class="form-group" show-errors>
+        <fa name="question-circle" class="pull-right pointer" ng-click="$ctrl.atHelp = !$ctrl.atHelp"></fa>
+        <label>Uruchamiaj scenę z wyzwalacza akcji w SUPLI</label>
+        <scene-at-triggers ng-model="$ctrl.scene.actionTriggers"></scene-at-triggers>
+        <div class="help-block fx-fade-up" ng-if="$ctrl.atHelp">
+            <p>Scena może być wykonywana po wykryciu skonfigurowanych wyzwalaczy akcji w SUPLI.</p>
+            <p>
+                Upewnij się, że dla zadanego wyzwalacza w SUPLA Cloud wybierzesz akcję "Inną" i tam wskażesz "Publikuj do integracji".
+                To umożliwi wykrywanie danego wyzwalacza w skryptach.
+            </p>
+            <p>
+                Następnie, dla każdej sceny, skonfiguruj ID kanału wyzwalacza oraz wyzwalacz, który ma powodować uruchomienie sceny.
+                Przykładowe wartości to
+                <code>HOLD</code>, <code>TURN_ON</code>, <code>TURN_OFF</code>,
+                <code>PRESS_X1</code>, <code>PRESS_X2</code>, <code>PRESS_X3</code>, <code>PRESS_X4</code>, <code>PRESS_X5</code>,
+                <code>TOGGLE_X1</code>, <code>TOGGLE_X2</code>, <code>TOGGLE_X3</code>, <code>TOGGLE_X4</code>, <code>TOGGLE_X5</code>.
+                Przekazana akcja zależy od firmware urządzenia. W razie wątpliwości, przed konfiguracją
+                sceny zobacz jaka akcja jest odnotowywana w Historii Kanałów.
+            </p>
+            <p>
+                Po każdym wykryciu wskazanego tutaj wyzwalacza zostanie podjęta próba wykonania sceny, z uwzględnieniem jej warunku (efekt jest taki
+                sam, jak kliknięcie przycisku "Wykonaj" na stronie sceny).
+            </p>
+        </div>
+    </div>
+
+    <div class="form-group" show-errors>
+        <fa name="question-circle" class="pull-right pointer" ng-click="$ctrl.intervalHelp = !$ctrl.intervalHelp"></fa>
+        <label>Wyzwalacz sceny w oparciu o czas</label>
+        <input type="text" class="form-control" ng-model="$ctrl.scene.intervals" name="interval">
+        <div class="help-block fx-fade-up" ng-if="$ctrl.intervalHelp">
+            <p>
+                Scena może być wykonywania <strong>najczęściej co 10 minut</strong>. Nawet jeśli podasz wyrażenie które będzie oznaczać
+                krótsze interwały, scena nie wykona się częściej. Ponadto, wyliczona godzina <strong>nie jest dokładną godziną wykonania
+                sceny</strong>.
+                Jej wykonanie nastąpi do maksymalnie kilku minut po wyznaczonym czasie.
+            </p>
+            <p>
+                Specyfikację czasu podaj w notacji <a href="https://pl.wikipedia.org/wiki/Crontab">crontab</a> podaj kiedy scena ma wykonywać się
+                automatycznie.
+                Wiele specyfikacji oddziel znakiem <code>|</code>. Serwis <a href="https://crontab.guru">crontab.guru</a> może być pomocny.
+                Przykłady:
+            </p>
+            <ul>
+                <li><code>* * * * *</code> - co minutę</li>
+                <li><code>*/15 * * * *</code> - co 15 minut</li>
+                <li><code>30 6 * * * | 0 15 * * *</code> - o 6:30 i o 15:00</li>
+                <li><code>44 7 * * 6,7</code> - o 7:44 w soboty i niedziele</li>
+                <li><code>13 * 20 5 *</code> - co godzinę w 13 minucie, tylko 20 maja</li>
+                <li><code>*/15 22-23,0-6 * * *</code> - co 15 minut od 22 do 6 rano</li>
+            </ul>
+        </div>
+    </div>
+
+    <div>
+        <div class="form-group">
+            <fa name="question-circle" class="pull-right pointer" ng-click="$ctrl.conditionHelp = !$ctrl.conditionHelp"></fa>
+            <label>Wyzwalacz sceny w oparciu o stan kanałów</label>
+            <span class="help-block small">Scena zostanie wykonana za każdym razem gdy zmiana stanu któregoś z użytych w wyrażeniu kanałów spowoduje zmianę jego wyniku.</span>
+            <feedback-field ng-model="$ctrl.scene.trigger" condition="true"></feedback-field>
+        </div>
+        <feedback-interpolation feedback="$ctrl.scene.trigger" condition="true" display-used-channels="true"></feedback-interpolation>
+    </div>
+
+    <div class="form-group">
+        <fa name="question-circle" class="pull-right pointer" ng-click="$ctrl.conditionHelp = !$ctrl.conditionHelp"></fa>
+        <label>Warunek wykonania sceny</label>
+        <span class="help-block small">Przy wykonaniu sceny poniższy warunek musi być spełniony, by kontyunuować jej wykonanie.</span>
+        <feedback-field ng-model="$ctrl.scene.condition" condition="true"></feedback-field>
+    </div>
+    <feedback-interpolation feedback="$ctrl.scene.condition" condition="true"></feedback-interpolation>
+
+    <div class="well fx-fade-up" ng-if="$ctrl.conditionHelp">
+        <p>Użyty język wyrażeń to <a href="https://twig.symfony.com">Twig</a>.</p>
+        <p>Użyj znaku <code>{</code> by wyświetlić dostępne podpowiedzi.</p>
+        <p>Zaglądnij na <a href="https://forum.supla.org/viewtopic.php?f=9&t=4131">forum</a> by zobaczyć co można tu wyprodukować. Kilka pomysłów
+            poniżej.</p>
+        <ul>
+            <li>
+                <code ng-non-bindable>{{state(1).on}}</code>
+                jeśli kanał 1 jest włączony
+            </li>
+            <li>
+                <code ng-non-bindable>{{not state(1).on}}</code>
+                jeśli kanał 1 jest wyłączony
+            </li>
+            <li>
+                <code ng-non-bindable>{{state(1).on and state(2).hi and not state(3).on}}</code> -
+                jeśli kanał 1 jest włączony, 2 jest zamknięty i 3 jest wyłączony
+            </li>
+            <li>
+                <code ng-non-bindable>{{state(4).temperature &lt; -2.5}}</code>
+                jeśli temperatura na kanale 4 jest mniejsza od -2.5&deg;C
+            </li>
+            <li>
+                <code ng-non-bindable>{{state(5).temperature &gt;= 10}}</code>
+                jeśli temperatura na kanale 5 jest większa lub równa 10&deg;C
+            </li>
+            <li>
+                <code ng-non-bindable>{{state(5).temperature > state(15).temperature}}</code>
+                jeśli temperatura na kanale 5 jest większa od temperatury na kanale 15
+            </li>
+            <li>
+                <code ng-non-bindable>{{state(5).temperature > state(15).temperature or not state(25).hi}}</code>
+                jeśli temperatura na kanale 5 jest większa od temperatury na kanale 15 lub jeśli kanał 25 jest otwarty
+            </li>
+        </ul>
+    </div>
+
+    <div class="form-group">
+        <h4>Akcje</h4>
+        <time-scene-selector ng-model="$ctrl.scene.actions"></time-scene-selector>
+    </div>
+
+    <h4>
+        Komendy głosowe
+        <fa name="question-circle" fw class="pull-right pointer" ng-if="!$ctrl.voiceTutorialShown" ng-click="$ctrl.voiceTutorialShown = true"></fa>
+    </h4>
+
+    <voice-commands-tutorial ng-if="$ctrl.voiceTutorialShown" class="fx-fade-up"></voice-commands-tutorial>
+
+    <voice-triggers-field ng-model="$ctrl.scene.voiceTriggers"></voice-triggers-field>
+
+    <div class="form-group">
+        <label>Odpowiedź</label>
+        <span class="help-block small">Odpowiedź jest widoczna przy wywoływaniu sceny za pomocą jej adresu URL.</span>
+        <feedback-field ng-model="$ctrl.scene.feedback"></feedback-field>
+        <p class="help-block">Podczas tworzenia odpowiedzi użyj znaku <code>{</code> by uzyskać podpowiedzi
+            możliwych do
+            użycia zmiennych.</p>
+    </div>
+    <div class="well fx-fade-up" ng-if="$ctrl.scene.feedback">
+        <feedback-interpolation feedback="$ctrl.scene.feedback"></feedback-interpolation>
+    </div>
+
+    <div class="form-group">
+        <label>Powiadomienia Pushover</label>
+        <span class="help-block small">Po wykonaniu sceny możesz wysłać powiadomienia. Pamiętaj o <a
+                ui-sref="account.pushover">konfiguracji</a>.</span>
+        <scene-notifications-field ng-model="$ctrl.scene.notifications"></scene-notifications-field>
+    </div>
+
+    <div class="form-group">
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" ng-model="$ctrl.scene.generateSlug">
+                Scena dostępna pod publicznym adresem URL
+            </label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" ng-model="$ctrl.scene.enabled">
+                Scena włączona
+            </label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12 text-right">
+            <button type="button" class="btn btn-default" ng-click="$ctrl.onCancel()">
+                <fa name="times" fw></fa>
+                Anuluj
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <fa name="{{ $ctrl.scene.id ? 'save' : 'plus' }}" fw></fa>
+                {{ $ctrl.scene.id ? 'Zapisz' : 'Dodaj' }} scenę
+            </button>
+        </div>
+    </div>
+</form>
